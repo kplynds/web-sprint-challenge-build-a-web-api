@@ -1,6 +1,18 @@
 const router = require("express").Router()
 const Actions = require("./actions-model")
 
+const validateAction = (req, res, next) => {
+    const description = req.body.description
+    const notes = req.body.notes
+    if (!description) {
+      res.status(400).json({ message: 'Missing description.' })
+    } else if (!notes) {
+      res.status(400).json({ message: 'Missing notes.' })
+    } else {
+      next();
+    }
+}
+
 router.get("/", (req, res) => {
   Actions.get()
   .then(data => {
@@ -25,7 +37,7 @@ router.get("/:id", (req, res) => {
   })
 })
 
-router.post("/", (req, res) => {
+router.post("/", validateAction, (req, res) => {
   if(req.body.project_id && req.body.notes && req.body.description) {
     Actions.insert(req.body)
     .then(data => {
@@ -39,7 +51,7 @@ router.post("/", (req, res) => {
   }
 })
 
-router.put("/:id", (req, res) => {
+router.put("/:id", validateAction, (req, res) => {
   if(req.body.id && req.body.project_id && req.body.description && req.body.notes) {
     Actions.update(req.params.id, req.body)
     .then(data => {
